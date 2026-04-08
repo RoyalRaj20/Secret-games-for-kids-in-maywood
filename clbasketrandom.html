@@ -1,42 +1,73 @@
-<html>
+// Navigation between games
+function showGame(gameId) {
+    const games = document.querySelectorAll('.game');
+    games.forEach(g => g.style.display = 'none');
+    document.getElementById(gameId).style.display = 'block';
+}
 
-<head>
-	<meta charset="UTF-8">
-	<title>Basket Random</title>
-	<meta name="viewport"
-		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-	<meta name="generator" content="Construct 3">
-	<link rel="stylesheet"
-		href="https://cdn.jsdelivr.net/gh/bubbls/ruffle@1520d90d7b2994737acd8f7a633d018f63c22ca7/style.css"
-		type="text/css">
-	<script>
-		window.addEventListener("keydown", function(e) { // space and arrow keys if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) { e.preventDefault(); } }, false); 
-	</script>
-</head>
+// ===================== Tic Tac Toe =====================
+const cells = document.querySelectorAll('[data-cell]');
+let xTurn = true;
 
-<body>
-	<div id="fb-root"></div>
-	<script
-		src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@1520d90d7b2994737acd8f7a633d018f63c22ca7/box2d.js">
-	</script> <noscript>
-		<div id="notSupportedWrap">
-			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
-			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-		</div>
-	</noscript>
-	<script
-		src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@1520d90d7b2994737acd8f7a633d018f63c22ca7/suppoortcheck.js">
-	</script>
-	<script
-		src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@1520d90d7b2994737acd8f7a633d018f63c22ca7/offclient.js"
-		type="module"></script>
-	<script
-		src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@1520d90d7b2994737acd8f7a633d018f63c22ca7/main.js"
-		type="module"></script>
-	<script
-		src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@1520d90d7b2994737acd8f7a633d018f63c22ca7/registersw.js"
-		type="module"></script>
-	<script src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@1520d90d7b2994737acd8f7a633d018f63c22ca7/api.js"></script>
-</body>
+function startGame() {
+    cells.forEach(cell => {
+        cell.textContent = '';
+        cell.addEventListener('click', handleClick, { once: true });
+    });
+    xTurn = true;
+}
 
-</html>
+function handleClick(e) {
+    e.target.textContent = xTurn ? 'X' : 'O';
+    xTurn = !xTurn;
+}
+
+// ===================== Guess the Number =====================
+const numberToGuess = Math.floor(Math.random() * 100) + 1;
+function checkGuess() {
+    const guess = Number(document.getElementById('guessInput').value);
+    const feedback = document.getElementById('feedback');
+    if (guess === numberToGuess) {
+        feedback.textContent = "🎉 Correct! You guessed it!";
+    } else if (guess < numberToGuess) {
+        feedback.textContent = "Too low!";
+    } else {
+        feedback.textContent = "Too high!";
+    }
+}
+
+// ===================== Snake Game =====================
+const canvas = document.getElementById('snakeCanvas');
+const ctx = canvas.getContext('2d');
+let snake = [{x:200, y:200}];
+let dx = 20;
+let dy = 0;
+let food = {x: Math.floor(Math.random()*20)*20, y: Math.floor(Math.random()*20)*20};
+
+function drawSnake() {
+    ctx.fillStyle = 'green';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    snake.forEach(part => ctx.fillRect(part.x, part.y, 20, 20));
+    ctx.fillStyle = 'red';
+    ctx.fillRect(food.x, food.y, 20, 20);
+}
+
+function moveSnake() {
+    const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) {
+        food = {x: Math.floor(Math.random()*20)*20, y: Math.floor(Math.random()*20)*20};
+    } else {
+        snake.pop();
+    }
+    drawSnake();
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' && dy === 0) { dx=0; dy=-20; }
+    if (e.key === 'ArrowDown' && dy === 0) { dx=0; dy=20; }
+    if (e.key === 'ArrowLeft' && dx === 0) { dx=-20; dy=0; }
+    if (e.key === 'ArrowRight' && dx === 0) { dx=20; dy=0; }
+});
+
+setInterval(moveSnake, 200);
